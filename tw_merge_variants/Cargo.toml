@@ -1,0 +1,19 @@
+[package]
+name = "tw_merge_variants"
+version = "0.1.5"
+edition = "2024"
+authors = ["Everlabs"]
+description = "Variant macros for tw_merge"
+keywords = ["tailwind", "variants", "leptos"]
+license = "MIT"
+readme = "./README.md"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "2", features = ["full"] }
+quote = "1"
+proc-macro2 = "1"
+darling = "0.20"
+
