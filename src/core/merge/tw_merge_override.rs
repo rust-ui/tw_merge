@@ -28,10 +28,13 @@ pub fn tw_merge_override(
         };
 
         let elements = style.elements.as_slice();
-        let result = collision_id_fn.apply(elements, style.arbitrary).map(Ok).unwrap_or_else(|| {
-            let arbitrary = style.arbitrary.unwrap_or_default();
-            super::get_collision_id::get_collision_id(elements, arbitrary)
-        });
+        let result = collision_id_fn
+            .apply(elements, style.arbitrary)
+            .map(Ok)
+            .unwrap_or_else(|| {
+                let arbitrary = style.arbitrary.unwrap_or_default();
+                super::get_collision_id::get_collision_id(elements, arbitrary)
+            });
 
         match result {
             Err(error) => match Collision::check_arbitrary(style.clone()) {
@@ -64,7 +67,9 @@ pub fn tw_merge_override(
                 // Add the current collision_id.
                 collision_styles.insert(collision);
 
-                let collisions = collisions_fn.apply(collision_id).or_else(|| get_collisions(collision_id));
+                let collisions = collisions_fn
+                    .apply(collision_id)
+                    .or_else(|| get_collisions(collision_id));
 
                 if let Some(collisions) = collisions {
                     collisions.into_iter().for_each(|collision_id| {
