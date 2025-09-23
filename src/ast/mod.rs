@@ -2,8 +2,7 @@ mod parser;
 #[cfg(test)]
 mod parser_test;
 
-pub(crate) use parser::parse_tailwind;
-pub(crate) use parser::take_until_unbalanced;
+pub(crate) use parser::{parse_tailwind, take_until_unbalanced};
 
 #[derive(Clone, Debug, PartialEq, Default)]
 pub(crate) struct AstStyle<'a> {
@@ -49,9 +48,6 @@ pub(crate) struct AstParseOptions<'a> {
 
 impl Default for AstParseOptions<'static> {
     fn default() -> Self {
-        Self {
-            prefix: "",
-            separator: ":",
-        }
+        Self { prefix: "", separator: ":" }
     }
 }

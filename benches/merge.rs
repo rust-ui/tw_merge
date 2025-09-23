@@ -15,9 +15,7 @@ const SAMPLE_SIZE: u32 = 100;
     sample_size = SAMPLE_SIZE
 )]
 fn tailwind_merge(bencher: Bencher, len: usize) {
-    bencher
-        .with_inputs(|| generate_random_classes(len).join(" "))
-        .bench_values(|class| merge_classes(class.as_str()));
+    bencher.with_inputs(|| generate_random_classes(len).join(" ")).bench_values(|class| merge_classes(class.as_str()));
 }
 
 #[divan::bench(
@@ -26,9 +24,7 @@ fn tailwind_merge(bencher: Bencher, len: usize) {
     sample_size = SAMPLE_SIZE
 )]
 fn tailwind_merge_slice(bencher: Bencher, len: usize) {
-    bencher
-        .with_inputs(|| generate_random_classes(len))
-        .bench_values(|class| tw_merge_slice(&class));
+    bencher.with_inputs(|| generate_random_classes(len)).bench_values(|class| tw_merge_slice(&class));
 }
 
 // create a vec with the a length of len and fill it with random data

@@ -1,4 +1,5 @@
-use tw_merge::{merge::merge_classes, tw_merge};
+use tw_merge::merge::merge_classes;
+use tw_merge::tw_merge;
 
 #[test]
 fn test_tw_merge_border_width_color() {
@@ -135,18 +136,9 @@ fn handles_conflicts_across_class_groups_correctly() {
     assert_eq!(merge_classes("inset-x-1 inset-1 left-1"), "inset-1 left-1");
     assert_eq!(merge_classes("inset-x-1 right-1 inset-1"), "inset-1");
     assert_eq!(merge_classes("inset-x-1 right-1 inset-x-1"), "inset-x-1");
-    assert_eq!(
-        merge_classes("inset-x-1 right-1 inset-y-1"),
-        "inset-x-1 right-1 inset-y-1"
-    );
-    assert_eq!(
-        merge_classes("right-1 inset-x-1 inset-y-1"),
-        "inset-x-1 inset-y-1"
-    );
-    assert_eq!(
-        merge_classes("inset-x-1 hover:left-1 inset-1"),
-        "hover:left-1 inset-1"
-    );
+    assert_eq!(merge_classes("inset-x-1 right-1 inset-y-1"), "inset-x-1 right-1 inset-y-1");
+    assert_eq!(merge_classes("right-1 inset-x-1 inset-y-1"), "inset-x-1 inset-y-1");
+    assert_eq!(merge_classes("inset-x-1 hover:left-1 inset-1"), "hover:left-1 inset-1");
 }
 
 #[test]
@@ -162,27 +154,18 @@ fn touch_classes_do_create_conflicts_correctly() {
     assert_eq!(merge_classes("touch-pan-x touch-pan-right"), "touch-pan-right");
     assert_eq!(merge_classes("touch-none touch-pan-x"), "touch-pan-x");
     assert_eq!(merge_classes("touch-pan-x touch-none"), "touch-none");
-    assert_eq!(
-        merge_classes("touch-pan-x touch-pan-y touch-pinch-zoom"),
-        "touch-pan-x touch-pan-y touch-pinch-zoom"
-    );
+    assert_eq!(merge_classes("touch-pan-x touch-pan-y touch-pinch-zoom"), "touch-pan-x touch-pan-y touch-pinch-zoom");
     assert_eq!(
         merge_classes("touch-manipulation touch-pan-x touch-pan-y touch-pinch-zoom"),
         "touch-pan-x touch-pan-y touch-pinch-zoom"
     );
-    assert_eq!(
-        merge_classes("touch-pan-x touch-pan-y touch-pinch-zoom touch-auto"),
-        "touch-auto"
-    );
+    assert_eq!(merge_classes("touch-pan-x touch-pan-y touch-pinch-zoom touch-auto"), "touch-auto");
 }
 
 #[test]
 fn line_clamp_classes_do_create_conflicts_correctly() {
     assert_eq!(merge_classes("overflow-auto inline line-clamp-1"), "line-clamp-1");
-    assert_eq!(
-        merge_classes("line-clamp-1 overflow-auto inline"),
-        "line-clamp-1 overflow-auto inline"
-    );
+    assert_eq!(merge_classes("line-clamp-1 overflow-auto inline"), "line-clamp-1 overflow-auto inline");
 }
 
 #[test]
@@ -195,10 +178,7 @@ fn text_color_font_size() {
     assert_eq!(merge_classes("text-red-500 text-lg"), "text-red-500 text-lg");
 
     // https://tailwindcss.com/docs/font-size#setting-the-line-height
-    assert_eq!(
-        merge_classes("text-red-500/10 text-lg/9"),
-        "text-red-500/10 text-lg/9"
-    );
+    assert_eq!(merge_classes("text-red-500/10 text-lg/9"), "text-red-500/10 text-lg/9");
 }
 
 #[test]

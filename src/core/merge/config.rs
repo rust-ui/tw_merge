@@ -20,24 +20,15 @@ pub struct MergeOptions {
 
 impl Default for MergeOptions {
     fn default() -> Self {
-        MERGE_OVERRIDE
-            .get()
-            .copied()
-            .unwrap_or(DEFAULT_MERGE_OPTIONS)
+        MERGE_OVERRIDE.get().copied().unwrap_or(DEFAULT_MERGE_OPTIONS)
     }
 }
 
-const DEFAULT_MERGE_OPTIONS: MergeOptions = MergeOptions {
-    prefix: "",
-    separator: ":",
-};
+const DEFAULT_MERGE_OPTIONS: MergeOptions = MergeOptions { prefix: "", separator: ":" };
 
 impl From<MergeOptions> for crate::ast::AstParseOptions<'static> {
     fn from(options: MergeOptions) -> Self {
-        crate::ast::AstParseOptions {
-            prefix: options.prefix,
-            separator: options.separator,
-        }
+        crate::ast::AstParseOptions { prefix: options.prefix, separator: options.separator }
     }
 }
 

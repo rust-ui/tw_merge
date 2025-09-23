@@ -1,9 +1,9 @@
 [package]
 name = "tw_merge"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2024"
-authors = ["Everlabs"]
-description = "Utilities for merging Tailwind CSS classes or creating variants."
+authors = ["Rustify"]
+description = "Macros for merging Tailwind CSS classes or creating variants."
 keywords = ["tailwind", "css", "rust", "ui", "leptos"]
 license = "MIT"
 readme = "./README.md"

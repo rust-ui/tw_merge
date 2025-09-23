@@ -50,22 +50,11 @@ mod test {
 
     #[test]
     fn test_btn() {
-        let button = Btn {
-            size: Default::default(),
-            color: Default::default(),
-        };
+        let button = Btn { size: Default::default(), color: Default::default() };
 
         assert_eq!(button.to_class(), "h-9 px-4 py-2 bg-blue-500 text-blue-100");
-        assert_eq!(
-            button.with_class("text-lg"),
-            "h-9 px-4 py-2 bg-blue-500 text-blue-100 text-lg",
-            "append class"
-        );
-        assert_eq!(
-            button.with_class("text-red-500"),
-            "h-9 px-4 py-2 bg-blue-500 text-red-500",
-            "color conflict"
-        );
+        assert_eq!(button.with_class("text-lg"), "h-9 px-4 py-2 bg-blue-500 text-blue-100 text-lg", "append class");
+        assert_eq!(button.with_class("text-red-500"), "h-9 px-4 py-2 bg-blue-500 text-red-500", "color conflict");
     }
 
     #[test]
@@ -80,10 +69,7 @@ mod test {
         let button = Btn::default();
 
         assert_eq!(button.to_class(), "h-9 px-4 py-2 bg-blue-500 text-blue-100");
-        assert_eq!(
-            button.with_class("h-10"),
-            "h-9 px-4 py-2 bg-blue-500 text-blue-100 h-10"
-        )
+        assert_eq!(button.with_class("h-10"), "h-9 px-4 py-2 bg-blue-500 text-blue-100 h-10")
     }
 
     #[test]
@@ -98,27 +84,15 @@ mod test {
             "h-8 rounded-md px-3 text-xs bg-red-500 text-red-100 flex"
         );
 
-        assert_eq!(
-            Btn::builder().size(BtnSize::Lg).to_class(),
-            "h-10 rounded-lg px-8 bg-blue-500 text-blue-100"
-        );
+        assert_eq!(Btn::builder().size(BtnSize::Lg).to_class(), "h-10 rounded-lg px-8 bg-blue-500 text-blue-100");
 
-        assert_eq!(
-            Btn::builder().to_class(),
-            "h-9 px-4 py-2 bg-blue-500 text-blue-100"
-        );
+        assert_eq!(Btn::builder().to_class(), "h-9 px-4 py-2 bg-blue-500 text-blue-100");
 
-        assert_eq!(
-            Btn::builder().with_class("grid"),
-            "h-9 px-4 py-2 bg-blue-500 text-blue-100 grid"
-        );
+        assert_eq!(Btn::builder().with_class("grid"), "h-9 px-4 py-2 bg-blue-500 text-blue-100 grid");
     }
 
     #[test]
     fn variant_join() {
-        assert_eq!(
-            tw_merge!(BtnColor::Blue, "text-lg",),
-            "bg-blue-500 text-blue-100 text-lg"
-        );
+        assert_eq!(tw_merge!(BtnColor::Blue, "text-lg",), "bg-blue-500 text-blue-100 text-lg");
     }
 }

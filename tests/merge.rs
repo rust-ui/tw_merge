@@ -1,4 +1,5 @@
-use tw_merge::{merge::merge_classes, tw_merge};
+use tw_merge::merge::merge_classes;
+use tw_merge::tw_merge;
 
 #[test]
 fn test_tw_merge() {
@@ -29,10 +30,7 @@ fn test_conflict_with_modifiers() {
 
     let class = "bg-red-500 bg-blue-500 hover:bg-green-500 text-green-500 hover:text-red-500";
     let result = merge_classes(class);
-    assert_eq!(
-        result,
-        "bg-blue-500 hover:bg-green-500 text-green-500 hover:text-red-500"
-    );
+    assert_eq!(result, "bg-blue-500 hover:bg-green-500 text-green-500 hover:text-red-500");
 
     let class = "hover:scale-1.5 hover:bg-orange-300";
     let result = merge_classes(class);
@@ -45,7 +43,8 @@ fn test_conflict_with_arbitrary_values() {
     let result = merge_classes(class);
     assert_eq!(result, "m-[10px]");
 
-    let class = "m-[2px] m-[11svmin] m-[12in] m-[13lvi] m-[14vb] m-[15vmax] m-[16mm] m-[17%] m-[18em] m-[19px] m-[10dvh]";
+    let class =
+        "m-[2px] m-[11svmin] m-[12in] m-[13lvi] m-[14vb] m-[15vmax] m-[16mm] m-[17%] m-[18em] m-[19px] m-[10dvh]";
     let result = merge_classes(class);
     assert_eq!(result, "m-[10dvh]");
 
@@ -108,17 +107,11 @@ fn test_conflict_with_arbitrary_values() {
 
     let class = "border-b border-[color:rgb(var(--color-gray-500-rgb)/50%))]";
     let result = merge_classes(class);
-    assert_eq!(
-        result,
-        "border-b border-[color:rgb(var(--color-gray-500-rgb)/50%))]"
-    );
+    assert_eq!(result, "border-b border-[color:rgb(var(--color-gray-500-rgb)/50%))]");
 
     let class = "border-[color:rgb(var(--color-gray-500-rgb)/50%))] border-b";
     let result = merge_classes(class);
-    assert_eq!(
-        result,
-        "border-[color:rgb(var(--color-gray-500-rgb)/50%))] border-b"
-    );
+    assert_eq!(result, "border-[color:rgb(var(--color-gray-500-rgb)/50%))] border-b");
 
     let class = "border-b border-[color:rgb(var(--color-gray-500-rgb)/50%))] border-some-coloooor";
     let result = merge_classes(class);
@@ -195,14 +188,8 @@ fn test_merge_with_non_tailwind() {
 
 #[test]
 fn handles_arbitrary_length_conflicts_with_labels_and_modifiers_correctly() {
-    assert_eq!(
-        merge_classes("hover:m-[2px] hover:m-[length:var(--c)]"),
-        "hover:m-[length:var(--c)]"
-    );
-    assert_eq!(
-        merge_classes("hover:focus:m-[2px] hover:focus:m-[length:var(--c)]"),
-        "hover:focus:m-[length:var(--c)]"
-    );
+    assert_eq!(merge_classes("hover:m-[2px] hover:m-[length:var(--c)]"), "hover:m-[length:var(--c)]");
+    assert_eq!(merge_classes("hover:focus:m-[2px] hover:focus:m-[length:var(--c)]"), "hover:focus:m-[length:var(--c)]");
     assert_eq!(
         merge_classes("border-b border-[color:rgb(var(--color-gray-500-rgb)/50%))]"),
         "border-b border-[color:rgb(var(--color-gray-500-rgb)/50%))]"
@@ -220,30 +207,18 @@ fn handles_arbitrary_length_conflicts_with_labels_and_modifiers_correctly() {
 #[test]
 fn handles_complex_arbitrary_value_conflicts_correctly() {
     assert_eq!(merge_classes("grid-rows-[1fr,auto] grid-rows-2"), "grid-rows-2");
-    assert_eq!(
-        merge_classes("grid-rows-[repeat(20,minmax(0,1fr))] grid-rows-3"),
-        "grid-rows-3"
-    );
+    assert_eq!(merge_classes("grid-rows-[repeat(20,minmax(0,1fr))] grid-rows-3"), "grid-rows-3");
 }
 
 #[test]
 fn handles_ambiguous_arbitrary_values_correctly() {
-    assert_eq!(
-        merge_classes("mt-2 mt-[calc(theme(fontSize.4xl)/1.125)]"),
-        "mt-[calc(theme(fontSize.4xl)/1.125)]"
-    );
+    assert_eq!(merge_classes("mt-2 mt-[calc(theme(fontSize.4xl)/1.125)]"), "mt-[calc(theme(fontSize.4xl)/1.125)]");
     assert_eq!(
         merge_classes("p-2 p-[calc(theme(fontSize.4xl)/1.125)_10px]"),
         "p-[calc(theme(fontSize.4xl)/1.125)_10px]"
     );
-    assert_eq!(
-        merge_classes("mt-2 mt-[length:theme(someScale.someValue)]"),
-        "mt-[length:theme(someScale.someValue)]"
-    );
-    assert_eq!(
-        merge_classes("mt-2 mt-[theme(someScale.someValue)]"),
-        "mt-[theme(someScale.someValue)]"
-    );
+    assert_eq!(merge_classes("mt-2 mt-[length:theme(someScale.someValue)]"), "mt-[length:theme(someScale.someValue)]");
+    assert_eq!(merge_classes("mt-2 mt-[theme(someScale.someValue)]"), "mt-[theme(someScale.someValue)]");
 
     assert_eq!(
         merge_classes("text-2xl text-[length:theme(someScale.someValue)]"),
@@ -253,10 +228,7 @@ fn handles_ambiguous_arbitrary_values_correctly() {
         merge_classes("text-2xl text-[calc(theme(fontSize.4xl)/1.125)]"),
         "text-[calc(theme(fontSize.4xl)/1.125)]"
     );
-    assert_eq!(
-        merge_classes("bg-cover bg-[percentage:30%] bg-[length:200px_100px]"),
-        "bg-[length:200px_100px]"
-    );
+    assert_eq!(merge_classes("bg-cover bg-[percentage:30%] bg-[length:200px_100px]"), "bg-[length:200px_100px]");
     assert_eq!(
         merge_classes("bg-none bg-[url(.)] bg-[image:.] bg-[url:.] bg-[linear-gradient(.)] bg-gradient-to-r"),
         "bg-gradient-to-r"
@@ -266,55 +238,31 @@ fn handles_ambiguous_arbitrary_values_correctly() {
 #[test]
 fn handles_color_conflicts_properly() {
     assert_eq!(merge_classes("bg-grey-5 bg-hotpink"), "bg-hotpink");
-    assert_eq!(
-        merge_classes("hover:bg-grey-5 hover:bg-hotpink"),
-        "hover:bg-hotpink"
-    );
-    assert_eq!(
-        merge_classes("stroke-[hsl(350_80%_0%)] stroke-[10px]"),
-        "stroke-[hsl(350_80%_0%)] stroke-[10px]"
-    );
+    assert_eq!(merge_classes("hover:bg-grey-5 hover:bg-hotpink"), "hover:bg-hotpink");
+    assert_eq!(merge_classes("stroke-[hsl(350_80%_0%)] stroke-[10px]"), "stroke-[hsl(350_80%_0%)] stroke-[10px]");
 }
 
 #[test]
 fn merges_content_utilities_correctly() {
-    assert_eq!(
-        merge_classes("content-['hello'] content-[attr(data-content)]"),
-        "content-[attr(data-content)]"
-    );
+    assert_eq!(merge_classes("content-['hello'] content-[attr(data-content)]"), "content-[attr(data-content)]");
 }
 
 #[test]
 fn merges_tailwind_classes_with_important_modifier_correctly() {
     assert_eq!(merge_classes("!font-medium !font-bold"), "!font-bold");
-    assert_eq!(
-        merge_classes("!font-medium !font-bold font-thin"),
-        "!font-bold font-thin"
-    );
+    assert_eq!(merge_classes("!font-medium !font-bold font-thin"), "!font-bold font-thin");
     assert_eq!(merge_classes("!right-2 !-inset-x-px"), "!-inset-x-px");
     assert_eq!(merge_classes("focus:!inline focus:!block"), "focus:!block");
 }
 
 #[test]
 fn merges_classes_with_per_side_border_colors_correctly() {
-    assert_eq!(
-        merge_classes("border-t-some-blue border-t-other-blue"),
-        "border-t-other-blue"
-    );
-    assert_eq!(
-        merge_classes("border-t-some-blue border-some-blue"),
-        "border-some-blue"
-    );
+    assert_eq!(merge_classes("border-t-some-blue border-t-other-blue"), "border-t-other-blue");
+    assert_eq!(merge_classes("border-t-some-blue border-some-blue"), "border-some-blue");
 
-    assert_eq!(
-        merge_classes("border-t-some-blue border-y-some-blue"),
-        "border-y-some-blue"
-    );
+    assert_eq!(merge_classes("border-t-some-blue border-y-some-blue"), "border-y-some-blue");
 
-    assert_eq!(
-        merge_classes("border-l-some-blue border-x-some-blue"),
-        "border-x-some-blue"
-    );
+    assert_eq!(merge_classes("border-l-some-blue border-x-some-blue"), "border-x-some-blue");
 }
 
 #[test]
@@ -327,10 +275,7 @@ fn test_data_attributes() {
 
 #[test]
 fn basic_arbitrary_variants() {
-    assert_eq!(
-        merge_classes("[&>*]:underline [&>*]:line-through"),
-        "[&>*]:line-through"
-    );
+    assert_eq!(merge_classes("[&>*]:underline [&>*]:line-through"), "[&>*]:line-through");
     assert_eq!(
         merge_classes("[&>*]:underline [&>*]:line-through [&_div]:line-through"),
         "[&>*]:line-through [&_div]:line-through"
@@ -359,36 +304,50 @@ fn arbitrary_variants_with_modifiers() {
 
 #[test]
 fn arbitrary_variants_with_complex_syntax_in_them() {
-    assert_eq!(merge_classes("[@media_screen{@media(hover:hover)}]:underline [@media_screen{@media(hover:hover)}]:line-through"), "[@media_screen{@media(hover:hover)}]:line-through");
-    assert_eq!(merge_classes("hover:[@media_screen{@media(hover:hover)}]:underline hover:[@media_screen{@media(hover:hover)}]:line-through"), "hover:[@media_screen{@media(hover:hover)}]:line-through");
+    assert_eq!(
+        merge_classes(
+            "[@media_screen{@media(hover:hover)}]:underline [@media_screen{@media(hover:hover)}]:line-through"
+        ),
+        "[@media_screen{@media(hover:hover)}]:line-through"
+    );
+    assert_eq!(
+        merge_classes(
+            "hover:[@media_screen{@media(hover:hover)}]:underline hover:[@media_screen{@media(hover:hover)}]:line-through"
+        ),
+        "hover:[@media_screen{@media(hover:hover)}]:line-through"
+    );
 }
 
 #[test]
 fn arbitrary_variants_with_attribute_selectors() {
-    assert_eq!(
-        merge_classes("[&[data-open]]:underline [&[data-open]]:line-through"),
-        "[&[data-open]]:line-through"
-    );
+    assert_eq!(merge_classes("[&[data-open]]:underline [&[data-open]]:line-through"), "[&[data-open]]:line-through");
 }
 
 #[test]
 fn arbitrary_variants_with_multiple_attribute_selectors() {
-    assert_eq!(merge_classes("[&[data-foo][data-bar]:not([data-baz])]:underline [&[data-foo][data-bar]:not([data-baz])]:line-through"), "[&[data-foo][data-bar]:not([data-baz])]:line-through");
+    assert_eq!(
+        merge_classes(
+            "[&[data-foo][data-bar]:not([data-baz])]:underline [&[data-foo][data-bar]:not([data-baz])]:line-through"
+        ),
+        "[&[data-foo][data-bar]:not([data-baz])]:line-through"
+    );
 }
 
 #[test]
 fn multiple_arbitrary_variants() {
-    assert_eq!(
-        merge_classes("[&>*]:[&_div]:underline [&>*]:[&_div]:line-through"),
-        "[&>*]:[&_div]:line-through"
-    );
+    assert_eq!(merge_classes("[&>*]:[&_div]:underline [&>*]:[&_div]:line-through"), "[&>*]:[&_div]:line-through");
     assert_eq!(
         merge_classes("[&>*]:[&_div]:underline [&_div]:[&>*]:line-through"),
         "[&>*]:[&_div]:underline [&_div]:[&>*]:line-through"
     );
     // What is this test even doing?
     // assert_eq!(merge_classes("hover:dark:[&>*]:focus:disabled:[&_div]:underline dark:hover:[&>*]:disabled:focus:[&_div]:line-through"), "dark:hover:[&>*]:disabled:focus:[&_div]:line-through");
-    assert_eq!(merge_classes("hover:dark:[&>*]:focus:[&_div]:disabled:underline dark:hover:[&>*]:disabled:focus:[&_div]:line-through"), "hover:dark:[&>*]:focus:[&_div]:disabled:underline dark:hover:[&>*]:disabled:focus:[&_div]:line-through");
+    assert_eq!(
+        merge_classes(
+            "hover:dark:[&>*]:focus:[&_div]:disabled:underline dark:hover:[&>*]:disabled:focus:[&_div]:line-through"
+        ),
+        "hover:dark:[&>*]:focus:[&_div]:disabled:underline dark:hover:[&>*]:disabled:focus:[&_div]:line-through"
+    );
 }
 
 // TODO: Fix this maybe?

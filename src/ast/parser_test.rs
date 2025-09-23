@@ -3,7 +3,7 @@ use nom::multi::many0;
 use super::parser::{parse_arbitrary_attribute_variant, parse_data_attribute_variant, parse_variant};
 use super::{ASTVariant, AstParseOptions, AstStyle};
 
-fn parse_tailwind(class: &str) -> Vec<Result<AstStyle, &str>> {
+fn parse_tailwind<'a>(class: &'a str) -> Vec<Result<AstStyle<'a>, &'a str>> {
     let options = AstParseOptions::default();
     let split = class.split_whitespace().collect::<Vec<_>>();
     super::parse_tailwind(split.as_slice(), options)
@@ -11,7 +11,7 @@ fn parse_tailwind(class: &str) -> Vec<Result<AstStyle, &str>> {
 
 #[test]
 fn basic_parse() {
-    let class = "flex items-center justify-between";
+    let class = "flex justify-between items-center";
     let result = parse_tailwind(class);
     let expected = vec![
         Ok(AstStyle {
@@ -47,10 +47,7 @@ fn basic_parse() {
 fn test_with_options() {
     let class = "dark|hover|tw-flex";
     let class = [class];
-    let options = AstParseOptions {
-        prefix: "tw-",
-        separator: "|",
-    };
+    let options = AstParseOptions { prefix: "tw-", separator: "|" };
     let result = super::parse_tailwind(&class, options);
     let expected = vec![Ok(AstStyle {
         source: "dark|hover|tw-flex",

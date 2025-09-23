@@ -1,12 +1,11 @@
+use nom::IResult;
+use nom::branch::alt;
+use nom::bytes::complete::{tag, take_while1};
+use nom::character::complete::char;
+use nom::combinator::{opt, recognize};
+use nom::sequence::{delimited, pair};
+
 use crate::ast::take_until_unbalanced;
-use nom::{
-    branch::alt,
-    bytes::complete::{tag, take_while1},
-    character::complete::char,
-    combinator::{opt, recognize},
-    sequence::{delimited, pair},
-    IResult,
-};
 
 pub mod length {
     use super::*;
@@ -17,13 +16,7 @@ pub mod length {
 
     // Parser for numeric values
     fn number(input: &str) -> IResult<&str, &str> {
-        recognize(pair(
-            pair(
-                opt(char('-')),
-                take_while1(|c: char| c.is_ascii_digit() || c == '.'),
-            ),
-            opt(unit),
-        ))(input)
+        recognize(pair(pair(opt(char('-')), take_while1(|c: char| c.is_ascii_digit() || c == '.')), opt(unit)))(input)
     }
 
     // Parser for units like px, em, rem, etc.
