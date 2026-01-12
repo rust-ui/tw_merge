@@ -23,19 +23,19 @@ fn basic_parse() {
             arbitrary: None,
         }),
         Ok(AstStyle {
-            source: "items-center",
-            important: false,
-            negative: false,
-            variants: vec![],
-            elements: vec!["items", "center"],
-            arbitrary: None,
-        }),
-        Ok(AstStyle {
             source: "justify-between",
             important: false,
             negative: false,
             variants: vec![],
             elements: vec!["justify", "between"],
+            arbitrary: None,
+        }),
+        Ok(AstStyle {
+            source: "items-center",
+            important: false,
+            negative: false,
+            variants: vec![],
+            elements: vec!["items", "center"],
             arbitrary: None,
         }),
     ];
@@ -82,6 +82,22 @@ fn test_with_important() {
     let result = parse_tailwind(class);
     let expected = vec![Ok(AstStyle {
         source: "!bg-blue-500",
+        important: true,
+        negative: false,
+        variants: vec![],
+        elements: vec!["bg", "blue", "500"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+// v4: important modifier at end of class
+#[test]
+fn test_with_important_v4_suffix() {
+    let class = "bg-blue-500!";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "bg-blue-500!",
         important: true,
         negative: false,
         variants: vec![],

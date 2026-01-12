@@ -21,12 +21,14 @@ pub fn parse_tailwind<'a>(class: &[&'a str], options: AstParseOptions<'a>) -> Ve
 
 #[inline]
 fn parse_style<'a>(input: &'a str, options: &AstParseOptions<'a>) -> IResult<&'a str, AstStyle<'a>> {
-    let (rest, (variants, important, negative, elements, arbitrary)) = tuple((
+    // v4 supports ! at end (flex!), v3 supports ! at start (!flex)
+    let (rest, (variants, important_prefix, negative, elements, arbitrary, important_suffix)) = tuple((
         many0(|s| parse_variant(options.separator, s)),
         opt(char('!')),
         opt(char('-')),
         opt(|s| parse_elements(options.prefix, s)),
         opt(parse_arbitrary),
+        opt(char('!')), // v4: important at end
     ))(input)?;
 
     let source = &input[..input.len() - rest.len()];
@@ -44,7 +46,7 @@ fn parse_style<'a>(input: &'a str, options: &AstParseOptions<'a>) -> IResult<&'a
         rest,
         AstStyle {
             source,
-            important: important.is_some(),
+            important: important_prefix.is_some() || important_suffix.is_some(),
             negative: negative.is_some(),
             variants,
             elements: elements.unwrap_or_default().elements,
@@ -58,8 +60,8 @@ fn parse_elements<'a>(prefix: &'a str, input: &'a str) -> IResult<&'a str, AstEl
     #[inline]
     fn parse_head(input: &str) -> IResult<&str, &str> {
         let stop = |c: char| -> bool {
-            // space
-            matches!(c, ' ' | '\n' | '\r' | '-' | '[' | ']' | '(' | ')')
+            // space, and ! for v4 important suffix
+            matches!(c, ' ' | '\n' | '\r' | '-' | '[' | ']' | '(' | ')' | '!')
         };
         take_till1(stop)(input)
     }
