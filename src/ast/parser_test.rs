@@ -270,3 +270,98 @@ fn test_double_arbitrary() {
     })];
     assert_eq!(result, expected)
 }
+
+// Named group variants (Tailwind v3.4+)
+// https://tailwindcss.com/docs/hover-focus-and-other-states#differentiating-nested-groups
+#[test]
+fn test_named_group_variant() {
+    let class = "group-hover/dropdown:opacity-100";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "group-hover/dropdown:opacity-100",
+        important: false,
+        negative: false,
+        variants: vec!["group-hover/dropdown"],
+        elements: vec!["opacity", "100"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_named_group_variant_visible() {
+    let class = "group-hover/dropdown:visible";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "group-hover/dropdown:visible",
+        important: false,
+        negative: false,
+        variants: vec!["group-hover/dropdown"],
+        elements: vec!["visible"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_named_peer_variant() {
+    let class = "peer-checked/label:text-blue-500";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "peer-checked/label:text-blue-500",
+        important: false,
+        negative: false,
+        variants: vec!["peer-checked/label"],
+        elements: vec!["text", "blue", "500"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_named_group_focus_within() {
+    let class = "group-focus-within/dropdown:scale-100";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "group-focus-within/dropdown:scale-100",
+        important: false,
+        negative: false,
+        variants: vec!["group-focus-within/dropdown"],
+        elements: vec!["scale", "100"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_multiple_named_group_classes() {
+    let class = "group-hover/dropdown:opacity-100 group-hover/dropdown:visible group-hover/dropdown:pointer-events-auto";
+    let result = parse_tailwind(class);
+    let expected = vec![
+        Ok(AstStyle {
+            source: "group-hover/dropdown:opacity-100",
+            important: false,
+            negative: false,
+            variants: vec!["group-hover/dropdown"],
+            elements: vec!["opacity", "100"],
+            arbitrary: None,
+        }),
+        Ok(AstStyle {
+            source: "group-hover/dropdown:visible",
+            important: false,
+            negative: false,
+            variants: vec!["group-hover/dropdown"],
+            elements: vec!["visible"],
+            arbitrary: None,
+        }),
+        Ok(AstStyle {
+            source: "group-hover/dropdown:pointer-events-auto",
+            important: false,
+            negative: false,
+            variants: vec!["group-hover/dropdown"],
+            elements: vec!["pointer", "events", "auto"],
+            arbitrary: None,
+        }),
+    ];
+    assert_eq!(result, expected)
+}
