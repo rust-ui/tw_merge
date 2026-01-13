@@ -1,6 +1,6 @@
 [package]
 name = "tw_merge"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2024"
 authors = ["Rustify"]
 description = "Macros for merging Tailwind CSS classes or creating variants."
