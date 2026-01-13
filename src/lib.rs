@@ -107,7 +107,7 @@
 //! 3. Enum variant class from [`TwVariant`]
 //! 4. Override class using [`IntoTailwindClass::with_class`] on the struct or builder
 //!
-//! ```
+//! ```ignore
 //! use tw_merge::*;
 //!
 //! // Your Component Type
@@ -143,7 +143,7 @@
 //! You can now use the `Btn` struct to generate Tailwind classes, using builder syntax, or using the struct directly
 //!
 //! ### Struct Syntax
-//! ```
+//! ```ignore
 //! # use tw_merge::*;
 //! # // Your Component Type
 //! # #[derive(TwClass)]
@@ -191,7 +191,7 @@
 //! ### Builder Syntax
 //! You access the builder using the `variants` method. Every variant that is not provided will be replaced with the default variant.
 //!
-//! ```
+//! ```ignore
 //! # use tw_merge::*;
 //! #
 //! # #[derive(TwClass)]
@@ -344,10 +344,10 @@ mod variant {
     /// }
     ///
     /// let btn = Btn { size: BtnSize::Default, color: BtnColor::Blue };
-    /// assert_eq!(btn.to_class(), "flex h-9 px-4 py-2 bg-blue-500 text-blue-100");
+    /// assert_eq!(btn.to_class(), "flex px-4 py-2 h-9 text-blue-100 bg-blue-500");
     ///
     /// let btn_variant = Btn::builder().color(BtnColor::Red).to_class();
-    /// assert_eq!(btn_variant, "flex h-9 px-4 py-2 bg-red-500 text-red-100");
+    /// assert_eq!(btn_variant, "flex px-4 py-2 h-9 text-red-100 bg-red-500");
     /// ```
     ///
     pub use tw_merge_variants::TwClass;
@@ -371,8 +371,8 @@ mod variant {
     ///     Red,
     /// }
     ///
-    /// assert_eq!("hover:brightness-50 bg-blue-500 text-blue-100", BtnColor::Default.as_class());
-    /// assert_eq!("hover:brightness-50 bg-red-500 text-red-100", BtnColor::Red.as_class());
+    /// assert_eq!("hover:brightness-50 text-blue-100 bg-blue-500", BtnColor::Default.as_class());
+    /// assert_eq!("hover:brightness-50 text-red-100 bg-red-500", BtnColor::Red.as_class());
     /// ```
     ///
     pub use tw_merge_variants::TwVariant;

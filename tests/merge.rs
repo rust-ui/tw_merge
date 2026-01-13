@@ -375,6 +375,16 @@ fn aspect_ratio() {
 
     let class = "aspect-square aspect-[16/9]";
     assert_eq!(merge_classes(class), "aspect-[16/9]");
+
+    // Tailwind v4 supports decimal fractions
+    let class = "aspect-square aspect-[1/0.8]";
+    assert_eq!(merge_classes(class), "aspect-[1/0.8]");
+
+    let class = "aspect-video aspect-[2.5/1]";
+    assert_eq!(merge_classes(class), "aspect-[2.5/1]");
+
+    let class = "aspect-[1/0.8] aspect-[4/3]";
+    assert_eq!(merge_classes(class), "aspect-[4/3]");
 }
 
 #[test]

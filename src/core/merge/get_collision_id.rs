@@ -7,7 +7,7 @@ pub fn get_collision_id(classes: &[&str], arbitrary: &str) -> Result<&'static st
         // https://tailwindcss.com/docs/aspect-ratio
         ["aspect", "auto" | "square" | "video"] => Ok("aspect"),
         ["aspect", n] if parse_fraction(n).is_some() => Ok("aspect"),
-        ["aspect"] if parse_fraction(arbitrary).is_some() => Ok("aspect"), 
+        ["aspect"] if parse_decimal_fraction(arbitrary) => Ok("aspect"), 
         // https://tailwindcss.com/docs/container
         ["container"] => Ok("container"),
 
@@ -962,6 +962,14 @@ fn parse_fraction(input: &str) -> Option<(usize, usize)> {
     let a = a.parse::<usize>().ok()?;
     let b = b.parse::<usize>().ok()?;
     Some((a, b))
+}
+
+/// Parses a decimal fraction like "1/0.8" or "16/9" (supports f64)
+fn parse_decimal_fraction(input: &str) -> bool {
+    let Some((a, b)) = input.split_once('/') else {
+        return false;
+    };
+    a.parse::<f64>().is_ok() && b.parse::<f64>().is_ok()
 }
 
 fn is_t_shirt_size(input: &str) -> bool {
