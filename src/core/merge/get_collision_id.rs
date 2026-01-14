@@ -849,6 +849,11 @@ pub fn get_collision_id(classes: &[&str], arbitrary: &str) -> Result<&'static st
         // https://tailwindcss.com/docs/screen-readers
         ["sr", "only"] | ["not", "sr", "only"] => Ok("screen-readers"),
 
+        // Typography plugin: https://github.com/tailwindlabs/tailwindcss-typography
+        ["prose"] => Ok("prose"),
+        ["not", "prose"] => Ok("not-prose"),
+        ["prose", ..] => Ok("prose"),
+
         // https://tailwindcss.com/docs/forced-color-adjust
         ["forced", "color", "adjust", "auto" | "none"] => Ok("forced-color-adjust"),
 
@@ -1425,5 +1430,38 @@ mod test {
         assert_eq!(result, Ok("transition-behavior"));
         let result = get_collision_id(&["transition", "normal"], "");
         assert_eq!(result, Ok("transition-behavior"));
+    }
+
+    #[test]
+    fn parse_typography_prose() {
+        // prose base
+        let result = get_collision_id(&["prose"], "");
+        assert_eq!(result, Ok("prose"));
+
+        // not-prose (escape from prose formatting)
+        let result = get_collision_id(&["not", "prose"], "");
+        assert_eq!(result, Ok("not-prose"));
+
+        // prose sizes
+        let result = get_collision_id(&["prose", "sm"], "");
+        assert_eq!(result, Ok("prose"));
+        let result = get_collision_id(&["prose", "lg"], "");
+        assert_eq!(result, Ok("prose"));
+        let result = get_collision_id(&["prose", "xl"], "");
+        assert_eq!(result, Ok("prose"));
+        let result = get_collision_id(&["prose", "2xl"], "");
+        assert_eq!(result, Ok("prose"));
+
+        // prose colors
+        let result = get_collision_id(&["prose", "gray"], "");
+        assert_eq!(result, Ok("prose"));
+        let result = get_collision_id(&["prose", "slate"], "");
+        assert_eq!(result, Ok("prose"));
+        let result = get_collision_id(&["prose", "zinc"], "");
+        assert_eq!(result, Ok("prose"));
+
+        // prose-invert
+        let result = get_collision_id(&["prose", "invert"], "");
+        assert_eq!(result, Ok("prose"));
     }
 }
