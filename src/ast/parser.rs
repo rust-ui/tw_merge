@@ -89,7 +89,8 @@ pub fn parse_variant<'a>(separator: &'a str, input: &'a str) -> IResult<&'a str,
 #[inline]
 fn parse_normal_variant(input: &str) -> IResult<&str, ASTVariant<'_>> {
     // Include '/' for named group variants like group-hover/dropdown, peer-checked/label
-    let parser = take_while1(|c: char| c.is_alphanumeric() || c == '-' || c == '/');
+    // Include '*' for child selector variant (Tailwind 3.4+) like *:text-gray-500
+    let parser = take_while1(|c: char| c.is_alphanumeric() || c == '-' || c == '/' || c == '*');
     let (rest, result) = parser(input)?;
     Ok((rest, ASTVariant::Normal(result)))
 }

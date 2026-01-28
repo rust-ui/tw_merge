@@ -335,7 +335,8 @@ fn test_named_group_focus_within() {
 
 #[test]
 fn test_multiple_named_group_classes() {
-    let class = "group-hover/dropdown:opacity-100 group-hover/dropdown:visible group-hover/dropdown:pointer-events-auto";
+    let class =
+        "group-hover/dropdown:opacity-100 group-hover/dropdown:visible group-hover/dropdown:pointer-events-auto";
     let result = parse_tailwind(class);
     let expected = vec![
         Ok(AstStyle {
@@ -363,5 +364,102 @@ fn test_multiple_named_group_classes() {
             arbitrary: None,
         }),
     ];
+    assert_eq!(result, expected)
+}
+
+// Child selector variant (Tailwind 3.4+)
+// https://tailwindcss.com/blog/tailwindcss-v3-4#new-primitives
+#[test]
+fn test_child_selector_variant() {
+    let class = "*:text-gray-500";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "*:text-gray-500",
+        important: false,
+        negative: false,
+        variants: vec!["*"],
+        elements: vec!["text", "gray", "500"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_child_selector_with_hover() {
+    let class = "hover:*:text-blue-500";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "hover:*:text-blue-500",
+        important: false,
+        negative: false,
+        variants: vec!["hover", "*"],
+        elements: vec!["text", "blue", "500"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_aria_selected_with_child_selector() {
+    let class = "aria-selected:*:ring-2";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "aria-selected:*:ring-2",
+        important: false,
+        negative: false,
+        variants: vec!["aria-selected", "*"],
+        elements: vec!["ring", "2"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_multiple_child_selector_classes() {
+    let class = "*:p-4 *:rounded hover:*:bg-gray-100";
+    let result = parse_tailwind(class);
+    let expected = vec![
+        Ok(AstStyle {
+            source: "*:p-4",
+            important: false,
+            negative: false,
+            variants: vec!["*"],
+            elements: vec!["p", "4"],
+            arbitrary: None,
+        }),
+        Ok(AstStyle {
+            source: "*:rounded",
+            important: false,
+            negative: false,
+            variants: vec!["*"],
+            elements: vec!["rounded"],
+            arbitrary: None,
+        }),
+        Ok(AstStyle {
+            source: "hover:*:bg-gray-100",
+            important: false,
+            negative: false,
+            variants: vec!["hover", "*"],
+            elements: vec!["bg", "gray", "100"],
+            arbitrary: None,
+        }),
+    ];
+    assert_eq!(result, expected)
+}
+
+// Descendant selector variant (Tailwind v4.0+)
+// https://tailwindcss.com/blog/tailwindcss-v4-beta#new-descendant-variant
+#[test]
+fn test_descendant_selector_variant() {
+    let class = "**:text-gray-500";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "**:text-gray-500",
+        important: false,
+        negative: false,
+        variants: vec!["**"],
+        elements: vec!["text", "gray", "500"],
+        arbitrary: None,
+    })];
     assert_eq!(result, expected)
 }
