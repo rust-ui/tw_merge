@@ -141,6 +141,40 @@ fn handles_conflicts_across_class_groups_correctly() {
     assert_eq!(merge_classes("inset-x-1 hover:left-1 inset-1"), "hover:left-1 inset-1");
 }
 
+// https://tailwindcss.com/docs/top-right-bottom-left#using-logical-properties
+#[test]
+fn handles_inset_logical_property_conflicts_correctly() {
+    // inset-inline-start/end conflict with start/end (same collision ID)
+    assert_eq!(merge_classes("start-full inset-inline-start-auto"), "inset-inline-start-auto");
+    assert_eq!(merge_classes("inset-inline-start-full start-auto"), "start-auto");
+    assert_eq!(merge_classes("end-full inset-inline-end-auto"), "inset-inline-end-auto");
+    assert_eq!(merge_classes("inset-inline-end-full end-auto"), "end-auto");
+
+    // inset-block-start/end conflict with top/bottom (same collision ID)
+    assert_eq!(merge_classes("top-full inset-block-start-auto"), "inset-block-start-auto");
+    assert_eq!(merge_classes("inset-block-start-full top-auto"), "top-auto");
+    assert_eq!(merge_classes("bottom-full inset-block-end-auto"), "inset-block-end-auto");
+    assert_eq!(merge_classes("inset-block-end-full bottom-auto"), "bottom-auto");
+
+    // inset-inline/block conflict with inset-x/y (same collision ID)
+    assert_eq!(merge_classes("inset-x-full inset-inline-auto"), "inset-inline-auto");
+    assert_eq!(merge_classes("inset-inline-full inset-x-auto"), "inset-x-auto");
+    assert_eq!(merge_classes("inset-y-full inset-block-auto"), "inset-block-auto");
+    assert_eq!(merge_classes("inset-block-full inset-y-auto"), "inset-y-auto");
+
+    // inset overrides logical properties
+    assert_eq!(merge_classes("inset-inline-start-full inset-1"), "inset-1");
+    assert_eq!(merge_classes("inset-block-end-full inset-1"), "inset-1");
+
+    // logical properties narrow from inset (same as physical)
+    assert_eq!(merge_classes("inset-1 inset-inline-start-full"), "inset-1 inset-inline-start-full");
+    assert_eq!(merge_classes("inset-1 inset-block-start-full"), "inset-1 inset-block-start-full");
+
+    // arbitrary values
+    assert_eq!(merge_classes("start-[10px] inset-inline-start-[20px]"), "inset-inline-start-[20px]");
+    assert_eq!(merge_classes("top-[10px] inset-block-start-[20px]"), "inset-block-start-[20px]");
+}
+
 #[test]
 fn ring_and_shadow_classes_do_not_create_conflict() {
     assert_eq!(merge_classes("ring shadow"), "ring shadow");

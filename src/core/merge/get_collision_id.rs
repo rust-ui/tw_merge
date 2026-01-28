@@ -146,6 +146,13 @@ pub fn get_collision_id(classes: &[&str], arbitrary: &str) -> Result<&'static st
         // https://tailwindcss.com/docs/top-right-bottom-left
         ["inset", "x", rest @ ..] => valid_trbl(rest, arbitrary, "inset-x", "Invalid inset-x"),
         ["inset", "y", rest @ ..] => valid_trbl(rest, arbitrary, "inset-y", "Invalid inset-y"),
+        // https://tailwindcss.com/docs/top-right-bottom-left#using-logical-properties
+        ["inset", "inline", "start", rest @ ..] => valid_trbl(rest, arbitrary, "start", "Invalid inset-inline-start"),
+        ["inset", "inline", "end", rest @ ..] => valid_trbl(rest, arbitrary, "end", "Invalid inset-inline-end"),
+        ["inset", "inline", rest @ ..] => valid_trbl(rest, arbitrary, "inset-x", "Invalid inset-inline"),
+        ["inset", "block", "start", rest @ ..] => valid_trbl(rest, arbitrary, "top", "Invalid inset-block-start"),
+        ["inset", "block", "end", rest @ ..] => valid_trbl(rest, arbitrary, "bottom", "Invalid inset-block-end"),
+        ["inset", "block", rest @ ..] => valid_trbl(rest, arbitrary, "inset-y", "Invalid inset-block"),
         ["inset", rest @ ..] => valid_trbl(rest, arbitrary, "inset", "Invalid inset"),
         ["top", rest @ ..] => valid_trbl(rest, arbitrary, "top", "Invalid top"),
         ["right", rest @ ..] => valid_trbl(rest, arbitrary, "right", "Invalid right"),
@@ -1073,6 +1080,54 @@ mod test {
 
         let result = get_collision_id(&["inset"], "10px");
         assert_eq!(result, Ok("inset"));
+    }
+
+    #[test]
+    fn parse_inset_logical_properties() {
+        // inset-inline-start-* → "start"
+        let result = get_collision_id(&["inset", "inline", "start", "full"], "");
+        assert_eq!(result, Ok("start"));
+
+        let result = get_collision_id(&["inset", "inline", "start", "auto"], "");
+        assert_eq!(result, Ok("start"));
+
+        let result = get_collision_id(&["inset", "inline", "start"], "10px");
+        assert_eq!(result, Ok("start"));
+
+        // inset-inline-end-* → "end"
+        let result = get_collision_id(&["inset", "inline", "end", "full"], "");
+        assert_eq!(result, Ok("end"));
+
+        let result = get_collision_id(&["inset", "inline", "end"], "10px");
+        assert_eq!(result, Ok("end"));
+
+        // inset-inline-* → "inset-x"
+        let result = get_collision_id(&["inset", "inline", "0"], "");
+        assert_eq!(result, Ok("inset-x"));
+
+        let result = get_collision_id(&["inset", "inline"], "10px");
+        assert_eq!(result, Ok("inset-x"));
+
+        // inset-block-start-* → "top"
+        let result = get_collision_id(&["inset", "block", "start", "full"], "");
+        assert_eq!(result, Ok("top"));
+
+        let result = get_collision_id(&["inset", "block", "start"], "-4px");
+        assert_eq!(result, Ok("top"));
+
+        // inset-block-end-* → "bottom"
+        let result = get_collision_id(&["inset", "block", "end", "full"], "");
+        assert_eq!(result, Ok("bottom"));
+
+        let result = get_collision_id(&["inset", "block", "end"], "10px");
+        assert_eq!(result, Ok("bottom"));
+
+        // inset-block-* → "inset-y"
+        let result = get_collision_id(&["inset", "block", "0"], "");
+        assert_eq!(result, Ok("inset-y"));
+
+        let result = get_collision_id(&["inset", "block"], "10px");
+        assert_eq!(result, Ok("inset-y"));
     }
 
     #[test]
