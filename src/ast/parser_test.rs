@@ -463,3 +463,115 @@ fn test_descendant_selector_variant() {
     })];
     assert_eq!(result, expected)
 }
+
+// Container query variants (Tailwind v4.0+)
+// https://tailwindcss.com/docs/responsive-design#container-queries
+#[test]
+fn test_container_query_variant_lg() {
+    let class = "@lg:max-w-2xl";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "@lg:max-w-2xl",
+        important: false,
+        negative: false,
+        variants: vec!["@lg"],
+        elements: vec!["max", "w", "2xl"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_container_query_variant_sm() {
+    let class = "@sm:grid-cols-3";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "@sm:grid-cols-3",
+        important: false,
+        negative: false,
+        variants: vec!["@sm"],
+        elements: vec!["grid", "cols", "3"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_container_query_variant_max() {
+    // @max-md: for max-width container queries
+    let class = "@max-md:grid-cols-1";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "@max-md:grid-cols-1",
+        important: false,
+        negative: false,
+        variants: vec!["@max-md"],
+        elements: vec!["grid", "cols", "1"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_named_container_query_variant() {
+    // @lg/sidebar: for named container queries
+    let class = "@lg/sidebar:flex";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "@lg/sidebar:flex",
+        important: false,
+        negative: false,
+        variants: vec!["@lg/sidebar"],
+        elements: vec!["flex"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_container_query_with_other_variants() {
+    let class = "hover:@lg:bg-blue-500";
+    let result = parse_tailwind(class);
+    let expected = vec![Ok(AstStyle {
+        source: "hover:@lg:bg-blue-500",
+        important: false,
+        negative: false,
+        variants: vec!["hover", "@lg"],
+        elements: vec!["bg", "blue", "500"],
+        arbitrary: None,
+    })];
+    assert_eq!(result, expected)
+}
+
+#[test]
+fn test_multiple_container_query_classes() {
+    let class = "@sm:grid-cols-1 @md:grid-cols-2 @lg:grid-cols-4";
+    let result = parse_tailwind(class);
+    let expected = vec![
+        Ok(AstStyle {
+            source: "@sm:grid-cols-1",
+            important: false,
+            negative: false,
+            variants: vec!["@sm"],
+            elements: vec!["grid", "cols", "1"],
+            arbitrary: None,
+        }),
+        Ok(AstStyle {
+            source: "@md:grid-cols-2",
+            important: false,
+            negative: false,
+            variants: vec!["@md"],
+            elements: vec!["grid", "cols", "2"],
+            arbitrary: None,
+        }),
+        Ok(AstStyle {
+            source: "@lg:grid-cols-4",
+            important: false,
+            negative: false,
+            variants: vec!["@lg"],
+            elements: vec!["grid", "cols", "4"],
+            arbitrary: None,
+        }),
+    ];
+    assert_eq!(result, expected)
+}

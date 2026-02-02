@@ -201,6 +201,16 @@ pub fn get_collision_id(classes: &[&str], arbitrary: &str) -> Result<&'static st
         // https://tailwindcss.com/docs/flex-wrap
         ["flex", "wrap"] | ["flex", "wrap", "reverse"] | ["flex", "nowrap"] => Ok("flex-wrap"),
 
+        // https://tailwindcss.com/docs/flex-grow
+        // Legacy: flex-grow-0, flex-grow-[n] (deprecated in favor of grow-*)
+        // Must be before generic ["flex", _] pattern
+        ["flex", "grow", ..] => Ok("flex-grow"),
+
+        // https://tailwindcss.com/docs/flex-shrink
+        // Legacy: flex-shrink-0, flex-shrink-[n] (deprecated in favor of shrink-*)
+        // Must be before generic ["flex", _] pattern
+        ["flex", "shrink", ..] => Ok("flex-shrink"),
+
         // https://tailwindcss.com/docs/flex
         ["flex", "1"] | ["flex", "auto"] | ["flex", "initial"] | ["flex", "none"] => Ok("flex"),
         // TODO: check this?
@@ -712,18 +722,54 @@ pub fn get_collision_id(classes: &[&str], arbitrary: &str) -> Result<&'static st
         ["transition", ..] => Ok("transition-property"),
 
         // https://tailwindcss.com/docs/transition-duration
+        // Accepts: duration-150, duration-[240ms], duration-[.5s]
         ["duration", rest] if rest.parse::<usize>().is_ok() => Ok("transition-duration"),
-        ["duration"] if arbitrary.parse::<usize>().is_ok() => Ok("transition-duration"),
+        ["duration"] if is_arbitrary_time(arbitrary) => Ok("transition-duration"),
 
-        // https:// tailwindcss.com/docs/transition-timing-function
+        // https://tailwindcss.com/docs/transition-timing-function
         ["ease", ..] => Ok("transition-timing-function"),
 
         // https://tailwindcss.com/docs/transition-delay
+        // Accepts: delay-150, delay-[240ms], delay-[.5s]
         ["delay", rest] if rest.parse::<usize>().is_ok() => Ok("transition-delay"),
-        ["delay"] if arbitrary.parse::<usize>().is_ok() => Ok("transition-delay"),
+        ["delay"] if is_arbitrary_time(arbitrary) => Ok("transition-delay"),
 
-        // https://tailwindcss.com/docs/animate
+        // ============================================================================
+        // tailwindcss-animate / tw-animate-css plugin (Tailwind v4)
+        // https://github.com/romboHQ/tailwindcss-animate
+        // These classes provide entry/exit animations commonly used with shadcn/ui
+        // ============================================================================
+
+        // Animation state classes (required to trigger animations)
+        ["animate", "in"] => Ok("animate-in-out"),
+        ["animate", "out"] => Ok("animate-in-out"),
+
+        // https://tailwindcss.com/docs/animate (generic animate-* utilities)
         ["animate", ..] => Ok("animate"),
+
+        // Fade animations (opacity): fade-in, fade-in-0 to fade-in-100, fade-out, fade-out-0 to fade-out-100
+        ["fade", "in", ..] => Ok("animate-opacity"),
+        ["fade", "out", ..] => Ok("animate-opacity"),
+
+        // Zoom animations (scale): zoom-in, zoom-in-0 to zoom-in-200, zoom-out, zoom-out-0 to zoom-out-200
+        ["zoom", "in", ..] => Ok("animate-scale"),
+        ["zoom", "out", ..] => Ok("animate-scale"),
+
+        // Spin animations (rotation): spin-in, spin-in-0 to spin-in-360, spin-out, spin-out-0 to spin-out-360
+        ["spin", "in", ..] => Ok("animate-rotate"),
+        ["spin", "out", ..] => Ok("animate-rotate"),
+
+        // Slide animations (translate)
+        // slide-in-from-top-*, slide-in-from-bottom-*, slide-in-from-left-*, slide-in-from-right-*
+        ["slide", "in", "from", "top", ..] => Ok("animate-translate-y"),
+        ["slide", "in", "from", "bottom", ..] => Ok("animate-translate-y"),
+        ["slide", "in", "from", "left", ..] => Ok("animate-translate-x"),
+        ["slide", "in", "from", "right", ..] => Ok("animate-translate-x"),
+        // slide-out-to-top-*, slide-out-to-bottom-*, slide-out-to-left-*, slide-out-to-right-*
+        ["slide", "out", "to", "top", ..] => Ok("animate-translate-y"),
+        ["slide", "out", "to", "bottom", ..] => Ok("animate-translate-y"),
+        ["slide", "out", "to", "left", ..] => Ok("animate-translate-x"),
+        ["slide", "out", "to", "right", ..] => Ok("animate-translate-x"),
 
         // https://tailwindcss.com/docs/scale
         // v4: scale-none resets individual transform
@@ -788,6 +834,10 @@ pub fn get_collision_id(classes: &[&str], arbitrary: &str) -> Result<&'static st
         // v4: transform-3d utility
         ["transform", "3d"] => Ok("transform-3d"),
 
+        // https://tailwindcss.com/docs/transform (Tailwind v4)
+        // The `transform` class enables GPU acceleration for transforms.
+        ["transform"] | ["transform", "gpu"] | ["transform", "none"] => Ok("transform"),
+
         // https://tailwindcss.com/docs/accent-color
         ["accent", ..] => Ok("accent-color"),
 
@@ -819,7 +869,10 @@ pub fn get_collision_id(classes: &[&str], arbitrary: &str) -> Result<&'static st
         ["scroll", rest, ..] if rest.starts_with('p') => Ok("scroll-padding"),
 
         // https://tailwindcss.com/docs/scroll-snap-align
-        ["snap", "none" | "start" | "end" | "center" | "align", "none"] => Ok("scroll-snap-align"),
+        // snap-start, snap-end, snap-center (2 elements)
+        ["snap", "start" | "end" | "center"] => Ok("scroll-snap-align"),
+        // snap-align-none (3 elements)
+        ["snap", "align", "none"] => Ok("scroll-snap-align"),
 
         // https://tailwindcss.com/docs/scroll-snap-stop#forcing-snap-position-stops
         ["snap", "normal"] | ["snap", "always"] => Ok("scroll-snap-stop"),
@@ -1018,6 +1071,28 @@ fn is_arbitrary_bg_image(input: &str) -> bool {
 
 fn is_arbitrary_size(input: &str) -> bool {
     is_valid_arbitrary_value(input, |label| label == "length" || label == "size" || label == "percentage", |_| false)
+}
+
+/// Validates CSS time values for duration/delay arbitrary values
+/// Accepts: "240ms", "0.5s", ".5s", "1s", pure numbers, or CSS variables
+fn is_arbitrary_time(input: &str) -> bool {
+    if input.is_empty() {
+        return false;
+    }
+    // Pure number (e.g., "150")
+    if input.parse::<usize>().is_ok() {
+        return true;
+    }
+    // CSS time with ms unit (e.g., "240ms", "0ms")
+    if let Some(num) = input.strip_suffix("ms") {
+        return num.parse::<f64>().is_ok();
+    }
+    // CSS time with s unit (e.g., "0.5s", ".5s", "1s")
+    if let Some(num) = input.strip_suffix('s') {
+        return num.parse::<f64>().is_ok() || num.starts_with('.') && num[1..].parse::<f64>().is_ok();
+    }
+    // CSS variable or calc()
+    input.starts_with("var(") || input.starts_with("calc(")
 }
 
 fn is_valid_arbitrary_value(input: &str, label: impl Fn(&str) -> bool, func: impl Fn(&str) -> bool) -> bool {
@@ -1518,5 +1593,252 @@ mod test {
         // prose-invert
         let result = get_collision_id(&["prose", "invert"], "");
         assert_eq!(result, Ok("prose"));
+    }
+
+    /// https://tailwindcss.com/docs/flex-shrink
+    /// Modern syntax: shrink-0, shrink-[n]
+    /// Legacy syntax: flex-shrink-0, flex-shrink-[n]
+    #[test]
+    fn parse_flex_shrink_legacy() {
+        // Modern syntax (shrink-*)
+        let result = get_collision_id(&["shrink", "0"], "");
+        assert_eq!(result, Ok("flex-shrink"));
+        let result = get_collision_id(&["shrink"], "");
+        assert_eq!(result, Ok("flex-shrink"));
+
+        // Legacy syntax (flex-shrink-*)
+        let result = get_collision_id(&["flex", "shrink", "0"], "");
+        assert_eq!(result, Ok("flex-shrink"));
+        let result = get_collision_id(&["flex", "shrink"], "");
+        assert_eq!(result, Ok("flex-shrink"));
+    }
+
+    /// https://tailwindcss.com/docs/flex-grow
+    /// Modern syntax: grow-0, grow-[n]
+    /// Legacy syntax: flex-grow-0, flex-grow-[n]
+    #[test]
+    fn parse_flex_grow_legacy() {
+        // Modern syntax (grow-*)
+        let result = get_collision_id(&["grow", "0"], "");
+        assert_eq!(result, Ok("flex-grow"));
+        let result = get_collision_id(&["grow"], "");
+        assert_eq!(result, Ok("flex-grow"));
+
+        // Legacy syntax (flex-grow-*)
+        let result = get_collision_id(&["flex", "grow", "0"], "");
+        assert_eq!(result, Ok("flex-grow"));
+        let result = get_collision_id(&["flex", "grow"], "");
+        assert_eq!(result, Ok("flex-grow"));
+    }
+
+    /// https://tailwindcss.com/docs/scroll-snap-align
+    /// Classes: snap-start, snap-end, snap-center, snap-align-none
+    #[test]
+    fn parse_scroll_snap_align() {
+        // snap-start
+        let result = get_collision_id(&["snap", "start"], "");
+        assert_eq!(result, Ok("scroll-snap-align"));
+
+        // snap-end
+        let result = get_collision_id(&["snap", "end"], "");
+        assert_eq!(result, Ok("scroll-snap-align"));
+
+        // snap-center
+        let result = get_collision_id(&["snap", "center"], "");
+        assert_eq!(result, Ok("scroll-snap-align"));
+
+        // snap-align-none
+        let result = get_collision_id(&["snap", "align", "none"], "");
+        assert_eq!(result, Ok("scroll-snap-align"));
+    }
+
+    /// https://tailwindcss.com/docs/scroll-snap-type
+    /// Classes: snap-none, snap-x, snap-y, snap-both, snap-mandatory, snap-proximity
+    #[test]
+    fn parse_scroll_snap_type() {
+        let result = get_collision_id(&["snap", "none"], "");
+        assert_eq!(result, Ok("scroll-snap-type"));
+
+        let result = get_collision_id(&["snap", "x"], "");
+        assert_eq!(result, Ok("scroll-snap-type"));
+
+        let result = get_collision_id(&["snap", "y"], "");
+        assert_eq!(result, Ok("scroll-snap-type"));
+
+        let result = get_collision_id(&["snap", "both"], "");
+        assert_eq!(result, Ok("scroll-snap-type"));
+
+        let result = get_collision_id(&["snap", "mandatory"], "");
+        assert_eq!(result, Ok("scroll-snap-type"));
+
+        let result = get_collision_id(&["snap", "proximity"], "");
+        assert_eq!(result, Ok("scroll-snap-type"));
+    }
+
+    /// https://tailwindcss.com/docs/transition-duration
+    /// https://tailwindcss.com/docs/transition-delay
+    /// Supports arbitrary time values: duration-[240ms], delay-[.5s]
+    #[test]
+    fn parse_duration_delay_arbitrary() {
+        // duration with standard values
+        let result = get_collision_id(&["duration", "150"], "");
+        assert_eq!(result, Ok("transition-duration"));
+
+        // duration with arbitrary ms
+        let result = get_collision_id(&["duration"], "240ms");
+        assert_eq!(result, Ok("transition-duration"));
+
+        // duration with arbitrary ms (another value)
+        let result = get_collision_id(&["duration"], "160ms");
+        assert_eq!(result, Ok("transition-duration"));
+
+        // duration with arbitrary seconds
+        let result = get_collision_id(&["duration"], "0.5s");
+        assert_eq!(result, Ok("transition-duration"));
+
+        // duration with arbitrary pure number
+        let result = get_collision_id(&["duration"], "300");
+        assert_eq!(result, Ok("transition-duration"));
+
+        // delay with standard values
+        let result = get_collision_id(&["delay", "150"], "");
+        assert_eq!(result, Ok("transition-delay"));
+
+        // delay with arbitrary ms
+        let result = get_collision_id(&["delay"], "240ms");
+        assert_eq!(result, Ok("transition-delay"));
+
+        // delay with arbitrary seconds
+        let result = get_collision_id(&["delay"], ".5s");
+        assert_eq!(result, Ok("transition-delay"));
+
+        // delay with CSS variable
+        let result = get_collision_id(&["delay"], "var(--delay)");
+        assert_eq!(result, Ok("transition-delay"));
+    }
+
+    /// https://tailwindcss.com/docs/transform
+    /// Legacy transform utility for GPU acceleration
+    #[test]
+    fn parse_transform_legacy() {
+        let result = get_collision_id(&["transform"], "");
+        assert_eq!(result, Ok("transform"));
+
+        let result = get_collision_id(&["transform", "gpu"], "");
+        assert_eq!(result, Ok("transform"));
+
+        let result = get_collision_id(&["transform", "none"], "");
+        assert_eq!(result, Ok("transform"));
+    }
+
+    /// https://github.com/romboHQ/tailwindcss-animate
+    /// Animation state classes: animate-in, animate-out
+    #[test]
+    fn parse_animate_in_out() {
+        let result = get_collision_id(&["animate", "in"], "");
+        assert_eq!(result, Ok("animate-in-out"));
+
+        let result = get_collision_id(&["animate", "out"], "");
+        assert_eq!(result, Ok("animate-in-out"));
+    }
+
+    /// https://github.com/romboHQ/tailwindcss-animate
+    /// Fade animations: fade-in, fade-in-0, fade-in-50, fade-out, fade-out-100
+    #[test]
+    fn parse_fade_animations() {
+        // fade-in (base)
+        let result = get_collision_id(&["fade", "in"], "");
+        assert_eq!(result, Ok("animate-opacity"));
+
+        // fade-in-0
+        let result = get_collision_id(&["fade", "in", "0"], "");
+        assert_eq!(result, Ok("animate-opacity"));
+
+        // fade-in-50
+        let result = get_collision_id(&["fade", "in", "50"], "");
+        assert_eq!(result, Ok("animate-opacity"));
+
+        // fade-out (base)
+        let result = get_collision_id(&["fade", "out"], "");
+        assert_eq!(result, Ok("animate-opacity"));
+
+        // fade-out-0
+        let result = get_collision_id(&["fade", "out", "0"], "");
+        assert_eq!(result, Ok("animate-opacity"));
+
+        // fade-out-100
+        let result = get_collision_id(&["fade", "out", "100"], "");
+        assert_eq!(result, Ok("animate-opacity"));
+    }
+
+    /// https://github.com/romboHQ/tailwindcss-animate
+    /// Zoom animations: zoom-in, zoom-in-50, zoom-out, zoom-out-95
+    #[test]
+    fn parse_zoom_animations() {
+        let result = get_collision_id(&["zoom", "in"], "");
+        assert_eq!(result, Ok("animate-scale"));
+
+        let result = get_collision_id(&["zoom", "in", "50"], "");
+        assert_eq!(result, Ok("animate-scale"));
+
+        let result = get_collision_id(&["zoom", "out"], "");
+        assert_eq!(result, Ok("animate-scale"));
+
+        let result = get_collision_id(&["zoom", "out", "95"], "");
+        assert_eq!(result, Ok("animate-scale"));
+    }
+
+    /// https://github.com/romboHQ/tailwindcss-animate
+    /// Spin animations: spin-in, spin-in-180, spin-out, spin-out-90
+    #[test]
+    fn parse_spin_animations() {
+        let result = get_collision_id(&["spin", "in"], "");
+        assert_eq!(result, Ok("animate-rotate"));
+
+        let result = get_collision_id(&["spin", "in", "180"], "");
+        assert_eq!(result, Ok("animate-rotate"));
+
+        let result = get_collision_id(&["spin", "out"], "");
+        assert_eq!(result, Ok("animate-rotate"));
+
+        let result = get_collision_id(&["spin", "out", "90"], "");
+        assert_eq!(result, Ok("animate-rotate"));
+    }
+
+    /// https://github.com/romboHQ/tailwindcss-animate
+    /// Slide animations: slide-in-from-top-4, slide-out-to-bottom-2, etc.
+    #[test]
+    fn parse_slide_animations() {
+        // slide-in-from-top-4
+        let result = get_collision_id(&["slide", "in", "from", "top", "4"], "");
+        assert_eq!(result, Ok("animate-translate-y"));
+
+        // slide-in-from-bottom-2
+        let result = get_collision_id(&["slide", "in", "from", "bottom", "2"], "");
+        assert_eq!(result, Ok("animate-translate-y"));
+
+        // slide-in-from-left-full
+        let result = get_collision_id(&["slide", "in", "from", "left", "full"], "");
+        assert_eq!(result, Ok("animate-translate-x"));
+
+        // slide-in-from-right-1/2
+        let result = get_collision_id(&["slide", "in", "from", "right", "1/2"], "");
+        assert_eq!(result, Ok("animate-translate-x"));
+
+        // slide-out-to-top-4
+        let result = get_collision_id(&["slide", "out", "to", "top", "4"], "");
+        assert_eq!(result, Ok("animate-translate-y"));
+
+        // slide-out-to-bottom-2
+        let result = get_collision_id(&["slide", "out", "to", "bottom", "2"], "");
+        assert_eq!(result, Ok("animate-translate-y"));
+
+        // slide-out-to-left-full
+        let result = get_collision_id(&["slide", "out", "to", "left", "full"], "");
+        assert_eq!(result, Ok("animate-translate-x"));
+
+        // slide-out-to-right-1/2
+        let result = get_collision_id(&["slide", "out", "to", "right", "1/2"], "");
+        assert_eq!(result, Ok("animate-translate-x"));
     }
 }
