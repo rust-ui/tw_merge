@@ -1,14 +1,16 @@
 <!-- cargo-rdme start -->
 
-# Tailwind Fuse
-[<img alt="github" src="https://img.shields.io/badge/github-gaucho--labs/tailwind--fuse-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/gaucho-labs/tailwind-fuse)
-[<img alt="crates.io" src="https://img.shields.io/crates/v/tailwind-fuse.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/tailwind-fuse)
-[<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-tailwind--fuse-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/tailwind-fuse)
-[<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/gaucho-labs/tailwind-fuse/ci.yml?branch=main&style=for-the-badge" height="20">](https://github.com/gaucho-labs/tailwind-fuse/actions?query=branch%3Amain)
+Forked from [tailwind-fuse](https://github.com/gaucho-labs/tailwind-fuse) by [gaucho-labs](https://github.com/gaucho-labs). Last updated January 2025 (Tailwind V3) — this fork brings it forward to V4.
+
+This workspace contains two crates:
+- **`tw_merge`** — class merging and joining macros
+- **`tw_merge_variants`** — proc-macro crate powering the `variant` feature (not intended for direct use)
+
+# Tw Merge (tw_merge)
 
 Two main utils are included in this crate:
 
-1. Fuse: Fuse multiple Tailwind classes, with optional conflict resolution.
+1. Merge: Merge multiple Tailwind classes, with optional conflict resolution.
     > Inspired by [Tailwind Merge](https://github.com/dcastil/tailwind-merge)
 2. Variants: Compose type-safe variant classes
     > Inspired by [Class Variance Authority](https://github.com/joe-bell/cva)
@@ -20,15 +22,15 @@ Variants requires the `variant` feature to be enabled.
 
 #### With variant
 ```bash
-cargo add tailwind-fuse --features variant
+cargo add tw_merge --features variant
 ```
 
 #### Without variant
 ```bash
-cargo add tailwind-fuse
+cargo add tw_merge
 ```
 
-## Usage: Fuse
+## Macros: tw_join! and tw_merge!
 
 You can use [`tw_join!`] to join Tailwind classes, and [`tw_merge!`] to merge Tailwind Classes handling conflicts.
 
@@ -36,7 +38,7 @@ You can use [`tw_join!`] to join Tailwind classes, and [`tw_merge!`] to merge Ta
 You can use anything that implements [`AsTailwindClass`]
 
 ```rust
-use tailwind_fuse::*;
+use tw_merge::*;
 
 // No conflict resolution
 assert_eq!(
@@ -61,7 +63,7 @@ assert_eq!(
 You can use Options to exclude certain classes from being merged
 
 ```rust
-use tailwind_fuse::*;
+use tw_merge::*;
 
 assert_eq!(
   "flex justify-center",
@@ -76,7 +78,7 @@ Use [`merge::set_merge_options`] to set global options for [`tw_merge!`] and var
 This can only be set once. Subsequent calls will be ignored.
 
 ```rust
-use tailwind_fuse::{*, merge::*};
+use tw_merge::{*, merge::*};
 
 const OPTIONS: MergeOptions = MergeOptions {
     prefix: "tw-",
@@ -112,7 +114,7 @@ The classes are merged in the following order, with the last class takes precede
 4. Override class using [`IntoTailwindClass::with_class`] on the struct or builder
 
 ```rust
-use tailwind_fuse::*;
+use tw_merge::*;
 
 // Your Component Type
 #[derive(TwClass)]
@@ -126,7 +128,7 @@ struct Btn {
 // Variant for size
 #[derive(TwVariant)]
 enum BtnSize {
-    #[tw(default, class = "h-9 px-4 py-2")]
+    #[tw(default, class = "px-4 py-2 h-9")]
     Default,
     #[tw(class = "h-8 px-3")]
     Sm,
@@ -137,9 +139,9 @@ enum BtnSize {
 // Variant for color
 #[derive(TwVariant)]
 enum BtnColor {
-    #[tw(default, class = "bg-blue-500 text-blue-100")]
+    #[tw(default, class = "text-blue-100 bg-blue-500")]
     Blue,
-    #[tw(class = "bg-red-500 text-red-100")]
+    #[tw(class = "text-red-100 bg-red-500")]
     Red,
 }
 ```

@@ -1,4 +1,3 @@
 [workspace]
-exclude = ["example"]
-members = ["fuse", "variant-macro"]
+members = ["tw_merge", "tw_merge_variants"]
 resolver = "2"
